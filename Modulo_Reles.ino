@@ -1,13 +1,3 @@
-/*********
-  Rui Santos
-  Complete project details at https://RandomNerdTutorials.com/esp-now-one-to-many-esp32-esp8266/
-  
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files.
-  
-  The above copyright notice and this permission notice shall be included in all
-  copies or substantial portions of the Software.
-*********/
 
 #include <esp_now.h>
 #include <WiFi.h>
@@ -39,13 +29,9 @@ void setup() {
   //Initialize Serial Monitor
   Serial.begin(115200);
   pinMode(25, OUTPUT);
-  //digitalWrite(25, LOW);
   pinMode(26, OUTPUT);
-  //digitalWrite(26, LOW);
   pinMode(32, OUTPUT);
-  //digitalWrite(32, LOW);
   pinMode(33, OUTPUT);
-  //digitalWrite(33, LOW);
   //Set device as a Wi-Fi Station
   WiFi.mode(WIFI_STA);
 
@@ -63,7 +49,7 @@ void setup() {
 void loop() {
 
   switch(myData.x){
-
+    //Se descomenta el módulo según la Placa 
     //Modulo 1
     /*
     case 10: if(state[0] == 0){
