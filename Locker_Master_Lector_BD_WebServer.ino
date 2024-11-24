@@ -12,8 +12,9 @@
 #define SS_PIN 5
 #define RST_PIN 22
 
-const char* ssid = "Autolab";//"Mario";
-const char* password = "Network24"; //"mario2024";
+//Credenciales de red a conectarse
+const char* ssid = "Autolab";
+const char* password = "Network24"; 
 
 // Configuración de IP estática (usa comas en vez de puntos)
 IPAddress local_IP(192, 168, 4, 200);         // La IP fija que quieres asignar
@@ -24,6 +25,7 @@ IPAddress secondaryDNS(8, 8, 4, 4);           // DNS secundario (opcional)
 
 WebServer server(80); // Servidor en el puerto 80
 
+//Declaración de constantes para asignar salidas y activar/desactivar relés
 const int relay1 = 12;  
 const int relay2 = 13;
 const int relay3 = 27;
@@ -43,8 +45,8 @@ bool delivered = false;
 bool Reading = false;
 unsigned long tiempoDelay = 2000;
 String ip_database ="192.168.4.100"; 
-// ip ESP32: 172.20.10.3
 
+//Llaves admin
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 String DatoHex;
 const String UserReg_1 = "E30D28C5";
@@ -52,13 +54,13 @@ const String UserReg_2 = "930551F4";
 const String UserReg_3 = "C3DF42C5";
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx    
 
-  String nombre;
-  String codigo_rfid;// = "EAD9D00E"; //EAD9D00C 
-  String identificacion;
-  String correo;
-  String programa;
-  String reservedBefore; 
-  String deliveredDevices;
+String nombre;
+String codigo_rfid;
+String identificacion;
+String correo;
+String programa;
+String reservedBefore; 
+String deliveredDevices;
 
 String devicesBuffer[5];
 String PrestadoBuffer[5];
@@ -77,12 +79,12 @@ MFRC522::MIFARE_Key key;
 // Init array that will store new NUID
 byte nuidPICC[4];
 
-// REPLACE WITH YOUR ESP RECEIVER'S MAC ADDRESS
+// Direcciones MAC para cominucación ESPNOW
 uint8_t broadcastAddress1[] = {0x24, 0xDC, 0xC3, 0xA6, 0xBD, 0x28};
 uint8_t broadcastAddress2[] = {0x24, 0xDC, 0xC3, 0xA6, 0xE0, 0x30};
 uint8_t broadcastAddress3[] = {0x24, 0xDC, 0xC3, 0xA6, 0xE1, 0xEC};
 uint8_t broadcastAddress4[] = {0x24, 0xDC, 0xC3, 0xA6, 0xDF, 0x50};
-uint8_t broadcastAddress5[] = {0xFC, 0xB4, 0x67, 0xF6, 0x8A, 0x5C};
+//uint8_t broadcastAddress5[] = {0xFC, 0xB4, 0x67, 0xF6, 0x8A, 0x5C};
 
 typedef struct test_struct {
   int x;
@@ -122,7 +124,7 @@ void OnDataRecv(const esp_now_recv_info* esp_now_info, const uint8_t *incomingDa
   deviceCount++;
 
 }
-// HTML para las diferentes pantallas
+// HTML para las diferentes interfaces
 const char* welcomePage = R"rawliteral(
 <!DOCTYPE html>
 <html lang="es">
@@ -772,7 +774,7 @@ void handleRegister() {
     if (server.method() == HTTP_GET) {
         server.send(200, "text/html", registerPage);
     } else if (server.method() == HTTP_POST) {
-        // Aquí se manejaría el registro del usuario
+        // Aquí se maneja el registro del usuario
         // Obtener datos del formulario:
          nombre = server.arg("nombre");
          identificacion = server.arg("identificacion");
@@ -818,7 +820,7 @@ void handleRetirarElementos() {
     }else{
       server.send(200, "text/html", retirarElementosPage);
       asignarCasillero();
-          //envia señal a la uhf vía ESPNOW para que inicie la lectura
+          //envía señal a la uhf vía ESPNOW para que inicie la lectura
     
     test.x = 150;
     test.y = 456;
@@ -838,7 +840,7 @@ void handleRetirarElementos() {
 
 void handleConfirmation() {
     //Se envía señal a la UHF vía ESPNOW para que finalice la lectura. envio de datos uno a uno.
-    //test.EPC_readed = "empty";
+   
     test.x = 0;
     test.y = 0;
 
@@ -851,15 +853,9 @@ void handleConfirmation() {
       Serial.println("Error sending the data");
     }
     
-    //registrarPrestamo(nombre, identificacion, id_casillero, "EPC1,EPC2,EPC3");
-   
+     
     char htmlBuffer[2048];  // Buffer para almacenar el HTML formateado
-    //devicesBuffer[0] = "Cables_1";
-    //devicesBuffer[1] = "Protoboar_1";
-    //devicesBuffer[2] = "Multimetro_3";
-    //devicesBuffer[3] = "Multimetro_4";
-    //devicesBuffer[4] = "Multimetro_5";
-    //deviceCount = 2;
+
     // Formatear el HTML con los valores actuales de las variables
     sprintf(htmlBuffer, confirmationPage, devicesBuffer[0].c_str(), devicesBuffer[1].c_str(), devicesBuffer[2].c_str(), devicesBuffer[3].c_str(), devicesBuffer[4].c_str());
     
@@ -1050,12 +1046,12 @@ void setup() {
     return;
   }
 
-      /// register fifth peer
-  memcpy(peerInfo.peer_addr, broadcastAddress5, 6);
-  if (esp_now_add_peer(&peerInfo) != ESP_OK){
-    Serial.println("Failed to add peer");
-    return;
-  }
+  //     /// register fifth peer
+  // memcpy(peerInfo.peer_addr, broadcastAddress5, 6);
+  // if (esp_now_add_peer(&peerInfo) != ESP_OK){
+  //   Serial.println("Failed to add peer");
+  //   return;
+  // }
   // Once ESPNow is successfully Init, we will register for recv CB to
   // get recv packer info
   esp_now_register_recv_cb(OnDataRecv);
@@ -1065,11 +1061,6 @@ void setup() {
 void loop() {
   
    server.handleClient();
-   
-  // String response = consultarElementoPorEPC("EPC"+String(count));
-  // if(count < 20)count++;
-  // else count=1;
-  // delay(5000);
 
 if(flagRestart == 1 ){
   delay(500);
@@ -1158,7 +1149,6 @@ void accionEnergizarPuesto(int cod_rfid){
 void accionEnergizarModoClase(){
 
     test.x = 999;
-    //test.y = 120-cod_rfid*10; //operación aleatoria
 
     esp_err_t result = esp_now_send(0, (uint8_t *) &test, sizeof(test_struct));
     
@@ -1240,14 +1230,14 @@ void nuevaLectura(String lectura_rfid){
           
           newCardRead = true;
 
-          delay(500);  // Esperar 2 segundos antes de hacer otra solicitud
+          delay(500);  // Esperar medio segundo antes de hacer otra solicitud
 
           String prestamo = consultarHistorial(identificacion);
 
           if(prestamo == "Sin prestamos"){
-             //Registrar prestamo()
-            //Leer la entrega
-            //Leer prestamos de objetos adicionales del mismo casillero
+             //Registrar prestamo
+             //Leer la entrega
+             //Leer prestamos de objetos adicionales del mismo casillero
           }else{
               Serial.println("El usuario " + nombre + " cuenta con un prestamo vigente.");
               delivered = true;
@@ -1340,7 +1330,7 @@ bool actualizarDisponibilidad(int casillero_id, bool disponibilidad) {
 String consultarUsuarioPorRFID(String codigo_rfid) {
     if (WiFi.status() == WL_CONNECTED) {
         HTTPClient http;
-        http.begin("http://" + ip_database + "/autolab_api/api.php");  // Reemplaza con la IP de tu servidor local
+        http.begin("http://" + ip_database + "/autolab_api/api.php");  
         http.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
         String postData = "accion=consultar_usuario&codigo_rfid=" + codigo_rfid;
@@ -1350,10 +1340,9 @@ String consultarUsuarioPorRFID(String codigo_rfid) {
         if (httpResponseCode > 0) {
             String response = http.getString();
             response.trim();
-            //Serial.println(response);
+           
 
             if (response.indexOf("error") == -1) {
-                // Aquí puedes procesar la respuesta JSON que contiene la información del usuario
                 Serial.println("Usuario encontrado:");
                 Serial.println(response);
                 return response;
@@ -1378,7 +1367,7 @@ void registrarPrestamo(String nombre_usuario, String identificacion, int casille
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
 
-    http.begin("http://" + ip_database + "/autolab_api/api.php");  // Reemplaza con la IP de tu servidor local
+    http.begin("http://" + ip_database + "/autolab_api/api.php");  
     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
     String postData = "accion=registrar_prestamo&nombre_usuario=" + nombre_usuario + "&identificacion=" + identificacion + "&casillero_id=" + String(casillero_id) + "&elementos=" + elementos;
@@ -1418,7 +1407,7 @@ String consultarHistorial(String identificacion) {
                 return response;             
                 
             } else {
-                   // Aquí puedes procesar la respuesta JSON que contiene la información del usuario
+                   
                 Serial.println("Prestamo vigente: ");
                 Serial.println(response);
                 return response;
@@ -1515,7 +1504,7 @@ void registrarUsuario(String nombre, String codigo_rfid, String identificacion, 
   if (WiFi.status() == WL_CONNECTED) {
     HTTPClient http;
 
-    http.begin("http://" + ip_database + "/autolab_api/api.php");  // Reemplaza con la IP de tu servidor local
+    http.begin("http://" + ip_database + "/autolab_api/api.php");
     http.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
     String postData = "accion=registrar_usuario&nombre=" + nombre + "&codigo_rfid=" + codigo_rfid + "&identificacion=" + identificacion + "&correo=" + Correo + "&programa=" + Programa;
@@ -1528,7 +1517,7 @@ void registrarUsuario(String nombre, String codigo_rfid, String identificacion, 
 
       if (response.indexOf("ya existe") > -1) {
         Serial.println("El usuario ya está registrado.");
-        // Aquí puedes manejar el caso, como solicitar nuevamente los datos o notificar al usuario
+
       } else if (response.indexOf("registrado con éxito") > -1) {
         Serial.println("Usuario registrado con éxito.");
       }
@@ -1543,7 +1532,7 @@ void registrarUsuario(String nombre, String codigo_rfid, String identificacion, 
   }
 }
 void eliminarPrestamo(String id) {
-  if (WiFi.status() == WL_CONNECTED) { // Verificar la conexión WiFi
+  if (WiFi.status() == WL_CONNECTED) { 
     HTTPClient http;
 
     // Construir la URL de la solicitud
